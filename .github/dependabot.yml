@@ -1,0 +1,82 @@
+# Dependabot Configuration for GitHub Advanced Security (GHAS)
+# This file controls how GitHub Dependabot creates pull requests to keep dependencies updated
+# Documentation: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+# Required: Specify version of config file syntax
+version: 2
+
+updates:
+  # JavaScript/Node.js dependency updates
+  - package-ecosystem: "npm"          # Ecosystem type (npm, pip, docker, etc.)
+    directory: "/"                    # Location of package manifests (package.json)
+    schedule:
+      interval: "weekly"              # Check frequency: daily, weekly, or monthly
+      day: "monday"                   # Specify day of week for weekly updates
+      time: "09:00"                   # Set specific time (UTC)
+      timezone: "America/New_York"    # Specify timezone
+    
+    # Pull request preferences
+    open-pull-requests-limit: 10      # Limit number of open PRs Dependabot can create
+    
+    # Security update settings - enables automatic PRs for vulnerable dependencies
+    # Critical security updates will bypass schedules and limits
+    allow:
+      - dependency-type: "direct"     # Update only direct dependencies
+      - dependency-type: "indirect"   # Also include transitive dependencies
+    
+    # Target branch for PRs
+    target-branch: "main"             # PRs will target this branch
+    
+    # Dependency version constraints
+    versioning-strategy: "auto"       # How to update version requirements
+    
+    # Labels for PRs - helps with automated workflows and categorization
+    labels:
+      - "dependencies"
+      - "security"
+    
+    # Ignore specific dependencies or versions
+    ignore:
+      - dependency-name: "express"    # Ignore all updates for express
+        # Or specify versions to ignore:
+        # versions: ["4.x", "5.x"]
+    
+    # Assign reviewers and team reviewers
+    assignees:
+      - "timothywarner"               # GitHub username
+    reviewers:
+      - "timothywarner"               # GitHub username
+    # teams:
+    #   - "security-team"             # GitHub team name
+    
+    # Create custom commit message
+    commit-message:
+      prefix: "deps"                  # Prefix for commit messages
+      include: "scope"                # Include scope of changes
+
+  # GitHub Actions workflow updates
+  - package-ecosystem: "github-actions"
+    directory: "/"                    # Location of workflow files (.github/workflows)
+    schedule:
+      interval: "weekly"
+    labels:
+      - "ci-cd"
+      - "dependencies"
+    
+  # Docker image updates
+  - package-ecosystem: "docker"
+    directory: "/"                    # Location of Dockerfile
+    schedule:
+      interval: "weekly"
+    labels:
+      - "docker"
+      - "dependencies"
+
+  # Development container updates
+  - package-ecosystem: "devcontainers"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dev-environment"
+      - "dependencies"
