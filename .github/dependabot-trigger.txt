@@ -1,0 +1,3 @@
+Initial file created on $(date)
+This file is used to trigger Dependabot scans manually through GitHub Actions.
+Modifying this file forces a new commit which prompts Dependabot to check dependencies. 
