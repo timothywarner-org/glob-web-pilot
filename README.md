@@ -1,9 +1,9 @@
 # Globomantics Test Web App
 
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![GitHub Actions Build](https://github.com/timothywarner/glob-web-pilot/workflows/Build/badge.svg)](https://github.com/timothywarner/glob-web-pilot/actions)
-[![Dependabot Status](https://img.shields.io/badge/Dependabot-enabled-brightgreen.svg)](https://github.com/timothywarner/glob-web-pilot/network/updates)
-[![CodeQL](https://github.com/timothywarner/glob-web-pilot/workflows/CodeQL/badge.svg)](https://github.com/timothywarner/glob-web-pilot/security/code-scanning)
+[![GitHub Actions Build](https://github.com/timothywarner/glob-web-pilot/actions/workflows/Build.yml/badge.svg)](https://github.com/timothywarner/glob-web-pilot/actions/workflows/Build.yml)
+[![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=timothywarner/glob-web-pilot)](https://dependabot.com)
+[![CodeQL](https://github.com/timothywarner/glob-web-pilot/actions/workflows/CodeQL.yml/badge.svg)](https://github.com/timothywarner/glob-web-pilot/actions/workflows/CodeQL.yml)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-red.svg)](https://github.com/timothywarner/glob-web-pilot/security/policy)
 
 > A Node.js/Express demonstration application for Pluralsight's GitHub Advanced Security (GHAS) course.
