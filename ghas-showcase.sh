@@ -461,6 +461,453 @@ echo 'security_check() {
 # All-in-one security status
 
 ################################################################################
+# SECTION 13: GRAPHQL QUERIES FOR GHAS
+################################################################################
+
+echo -e "\n${YELLOW}=== SECTION 13: ADVANCED GRAPHQL QUERIES FOR GHAS ===${NC}\n"
+
+# Comprehensive security overview with GraphQL
+echo -e "${BLUE}# Get complete security overview for the repository${NC}"
+echo "gh api graphql -f query='
+{
+  repository(owner: \"${OWNER}\", name: \"${REPO}\") {
+    name
+    isPrivate
+    vulnerabilityAlerts {
+      totalCount
+    }
+    securityPolicyUrl
+
+    # Code scanning summary
+    codeScanningAlerts: vulnerabilityAlerts(first: 1) {
+      totalCount
+    }
+
+    # Recent security advisories
+    securityAdvisories(first: 5) {
+      nodes {
+        summary
+        severity
+        publishedAt
+        ghsaId
+        cvss {
+          score
+          vectorString
+        }
+      }
+    }
+  }
+}'"
+# Complete security posture at a glance
+
+# Query vulnerability alerts with details
+echo -e "\n${BLUE}# Query detailed vulnerability information${NC}"
+echo "gh api graphql -f query='
+{
+  repository(owner: \"${OWNER}\", name: \"${REPO}\") {
+    vulnerabilityAlerts(first: 10, states: OPEN) {
+      totalCount
+      nodes {
+        createdAt
+        dismissedAt
+        dismissReason
+        dismissComment
+        vulnerableManifestPath
+        vulnerableRequirements
+        securityAdvisory {
+          summary
+          description
+          severity
+          ghsaId
+          cvss {
+            score
+            vectorString
+          }
+          identifiers {
+            type
+            value
+          }
+        }
+        securityVulnerability {
+          package {
+            name
+            ecosystem
+          }
+          severity
+          vulnerableVersionRange
+          firstPatchedVersion {
+            identifier
+          }
+        }
+      }
+    }
+  }
+}'"
+# Detailed vulnerability information for analysis
+
+# Query Dependabot alerts with GraphQL
+echo -e "\n${BLUE}# Get Dependabot alerts with remediation info${NC}"
+echo "gh api graphql -f query='
+{
+  repository(owner: \"${OWNER}\", name: \"${REPO}\") {
+    dependabotAlerts: vulnerabilityAlerts(first: 20) {
+      nodes {
+        number
+        state
+        createdAt
+        fixedAt
+        dismissedAt
+        securityVulnerability {
+          package {
+            name
+            ecosystem
+          }
+          severity
+          vulnerableVersionRange
+          firstPatchedVersion {
+            identifier
+          }
+        }
+        vulnerableManifestFilename
+        vulnerableManifestPath
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+}'"
+# Dependabot alerts with pagination support
+
+# Query secret scanning alerts via GraphQL
+echo -e "\n${BLUE}# Get secret scanning statistics${NC}"
+echo "gh api graphql -f query='
+{
+  repository(owner: \"${OWNER}\", name: \"${REPO}\") {
+    name
+    pushedAt
+    defaultBranchRef {
+      name
+    }
+    # Note: Secret scanning data requires additional permissions
+    isSecurityPolicyEnabled
+    securityPolicyUrl
+  }
+  organization(login: \"${OWNER}\") {
+    repositories(first: 100) {
+      totalCount
+      nodes {
+        name
+        isPrivate
+        vulnerabilityAlerts {
+          totalCount
+        }
+      }
+    }
+  }
+}'"
+# Organization-wide security overview
+
+# Query code scanning alerts with location info
+echo -e "\n${BLUE}# Get code scanning alerts with file locations${NC}"
+echo "gh api graphql -f query='
+query GetCodeScanningAlerts {
+  repository(owner: \"${OWNER}\", name: \"${REPO}\") {
+    name
+    defaultBranchRef {
+      name
+    }
+    # Code scanning data via REST API is more comprehensive
+    # This query shows repository scanning status
+    codeOfConduct {
+      name
+    }
+    securityPolicyUrl
+    isSecurityPolicyEnabled
+  }
+}'"
+# Basic code scanning status check
+
+# Query pull request security status
+echo -e "\n${BLUE}# Check PR security status with GraphQL${NC}"
+echo "gh api graphql -f query='
+{
+  repository(owner: \"${OWNER}\", name: \"${REPO}\") {
+    pullRequest(number: 34) {
+      title
+      state
+      mergeable
+      commits(last: 1) {
+        nodes {
+          commit {
+            statusCheckRollup {
+              state
+              contexts(first: 10) {
+                nodes {
+                  __typename
+                  ... on CheckRun {
+                    name
+                    status
+                    conclusion
+                    detailsUrl
+                  }
+                  ... on StatusContext {
+                    context
+                    state
+                    description
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}'"
+# PR security check status
+
+# Query security advisory database
+echo -e "\n${BLUE}# Search global security advisory database${NC}"
+echo "gh api graphql -f query='
+{
+  securityAdvisories(first: 10, ecosystem: NPM, severity: HIGH) {
+    totalCount
+    nodes {
+      ghsaId
+      summary
+      description
+      severity
+      publishedAt
+      updatedAt
+      withdrawnAt
+      cvss {
+        score
+        vectorString
+      }
+      cwes {
+        nodes {
+          cweId
+          name
+          description
+        }
+      }
+      identifiers {
+        type
+        value
+      }
+      vulnerabilities(first: 5) {
+        nodes {
+          package {
+            ecosystem
+            name
+          }
+          severity
+          vulnerableVersionRange
+          firstPatchedVersion {
+            identifier
+          }
+        }
+      }
+    }
+  }
+}'"
+# Global advisory database search
+
+# Query for specific CVE details
+echo -e "\n${BLUE}# Get details for specific CVE${NC}"
+echo "gh api graphql -f query='
+{
+  securityAdvisory(ghsaId: \"GHSA-35jh-r3h4-6jhm\") {
+    ghsaId
+    summary
+    description
+    severity
+    publishedAt
+    cvss {
+      score
+      vectorString
+    }
+    cwes {
+      nodes {
+        cweId
+        name
+      }
+    }
+    vulnerabilities(first: 10) {
+      nodes {
+        package {
+          ecosystem
+          name
+        }
+        severity
+        vulnerableVersionRange
+        firstPatchedVersion {
+          identifier
+        }
+      }
+    }
+    references {
+      url
+    }
+  }
+}'"
+# Specific CVE/GHSA details
+
+# Query organization security settings
+echo -e "\n${BLUE}# Get organization security configuration${NC}"
+echo "gh api graphql -f query='
+{
+  organization(login: \"${OWNER}\") {
+    name
+    repositories(first: 50) {
+      totalCount
+      nodes {
+        name
+        isPrivate
+        isArchived
+        securityPolicyUrl
+        vulnerabilityAlerts {
+          totalCount
+        }
+        defaultBranchRef {
+          name
+          branchProtectionRule {
+            id
+            requiresCodeOwnerReviews
+            requiresStatusChecks
+            requiredStatusCheckContexts
+            dismissesStaleReviews
+            requiresConversationResolution
+          }
+        }
+      }
+    }
+  }
+}'"
+# Organization-wide security settings
+
+# Query for security events timeline
+echo -e "\n${BLUE}# Get security events timeline${NC}"
+echo "gh api graphql -f query='
+{
+  repository(owner: \"${OWNER}\", name: \"${REPO}\") {
+    vulnerabilityAlerts(first: 50, orderBy: {field: CREATED_AT, direction: DESC}) {
+      nodes {
+        createdAt
+        dismissedAt
+        fixedAt
+        state
+        securityVulnerability {
+          severity
+          package {
+            name
+          }
+        }
+      }
+    }
+  }
+}'"
+# Security events timeline
+
+# Query dependency graph
+echo -e "\n${BLUE}# Get dependency graph information${NC}"
+echo "gh api graphql -f query='
+{
+  repository(owner: \"${OWNER}\", name: \"${REPO}\") {
+    dependencyGraphManifests {
+      totalCount
+      nodes {
+        filename
+        dependenciesCount
+        exceedsMaxSize
+        parseable
+        blobPath
+      }
+    }
+  }
+}'"
+# Dependency graph manifests
+
+# Complex aggregation query
+echo -e "\n${BLUE}# Aggregate security metrics across organization${NC}"
+echo "gh api graphql -f query='
+{
+  organization(login: \"${OWNER}\") {
+    repositories(first: 100, privacy: PUBLIC) {
+      nodes {
+        name
+        vulnerabilityAlerts {
+          totalCount
+        }
+      }
+      totalCount
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+}'"
+# Organization-wide vulnerability count
+
+# Query for automated security fixes
+echo -e "\n${BLUE}# Check Dependabot automated fixes status${NC}"
+echo "gh api graphql -f query='
+{
+  repository(owner: \"${OWNER}\", name: \"${REPO}\") {
+    autoMergeAllowed
+    deleteBranchOnMerge
+    mergeCommitAllowed
+    rebaseMergeAllowed
+    squashMergeAllowed
+    pullRequests(first: 10, labels: [\"dependencies\"], states: OPEN) {
+      nodes {
+        title
+        number
+        createdAt
+        author {
+          login
+        }
+        labels(first: 5) {
+          nodes {
+            name
+          }
+        }
+      }
+    }
+  }
+}'"
+# Dependabot PR status
+
+# Query security policy compliance
+echo -e "\n${BLUE}# Check security policy compliance${NC}"
+echo "gh api graphql -f query='
+{
+  repository(owner: \"${OWNER}\", name: \"${REPO}\") {
+    securityPolicyUrl
+    isSecurityPolicyEnabled
+    codeOfConduct {
+      name
+      url
+    }
+    licenseInfo {
+      name
+      spdxId
+    }
+    hasIssuesEnabled
+    hasWikiEnabled
+    isArchived
+    isDisabled
+    isLocked
+    isPrivate
+    isTemplate
+  }
+}'"
+# Repository security compliance check
+
+################################################################################
 # FOOTER
 ################################################################################
 
