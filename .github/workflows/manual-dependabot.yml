@@ -19,7 +19,7 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         
       # This step forces Dependabot to re-check dependencies
       - name: Update dependencies to trigger Dependabot
